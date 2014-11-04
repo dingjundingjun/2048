@@ -14,6 +14,8 @@ using namespace gui;
 #define MOVE_RIGHT 1
 #define MOVE_TOP 2
 #define MOVE_DOWN 3
+
+#define AREA_PX  7
 /**出现的数字*/
 static int NUM[2] = {2,4};
 static char* gNumRes[] = {"2048/num_2.png","2048/num_4.png","2048/num_8.png","2048/num_16.png","2048/num_32.png","2048/num_2.png","2048/num_4.png","2048/num_8.png","2048/num_16.png","2048/num_32.png","2048/num_2.png","2048/num_4.png"};
@@ -43,8 +45,12 @@ public:
 	void showSprite(int row,int column,int num,bool bAnimate);
 	/**移动方块*/
 	bool move(int direct);
+	/**另一种移动算法*/
+	bool moveOther(int direct);
 	/**刷新整个区域*/
 	void updateAllArea();
+	/**移动计算*/
+	void moveAnimation(int direct,int move[4][4]);
 	/**计算两点间距离*/
 	double distance(CCPoint pt1,CCPoint pt2);
 	/**判断是否结束游戏*/

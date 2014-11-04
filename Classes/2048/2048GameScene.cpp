@@ -87,7 +87,7 @@ void TZFGGameScene::showSprite(int row,int column,int numIndex,bool bAnimate)
 
 	sprite->setContentSize(ccp(65,65));
 	sprite->setAnchorPoint(ccp(0.5,0.5));
-	sprite->setPosition(ccp(10 + column*sprite->getContentSize().width + column*7 + sprite->getContentSize().width/2,mBackgroundSprite->getContentSize().height - 73 - (row+1)*sprite->getContentSize().height - (row+1)*7 +  sprite->getContentSize().height/2));
+	sprite->setPosition(ccp(10 + column*sprite->getContentSize().width + column*AREA_PX + sprite->getContentSize().width/2,mBackgroundSprite->getContentSize().height - 73 - (row+1)*sprite->getContentSize().height - (row+1)*AREA_PX +  sprite->getContentSize().height/2));
 	
 	ccColor4B color;
 	color.r = gColor[numIndex][0];
@@ -133,7 +133,7 @@ void TZFGGameScene::showSprite(int row,int column,int numIndex,bool bAnimate)
 		CCFiniteTimeAction *ccFiniteAction = CCSpawn::create(scale,fadeIn,NULL);
 		sprite->runAction(ccFiniteAction);
 	}
-	mGameLayer->addChild(sprite);
+	mGameLayer->addChild(sprite,1,row*10 + column);
 }
 
 void TZFGGameScene::clearArea()
@@ -399,6 +399,353 @@ bool TZFGGameScene::move(int direct)
 	return true;
 }
 
+void TZFGGameScene::moveAnimation(int direct,int move[4][4])
+{
+	switch(direct)
+	{
+		case MOVE_LEFT:
+		case MOVE_RIGHT:
+		{
+			for(int i = 0 ; i < GAME_AREA_ROW;i++)
+			{
+				int moveLength = 0;
+				for(int j = 0 ; j < GAME_AREA_COLUMN;j++)
+				{
+					if(move[i][j] == 1)
+					{
+						moveLength++;
+					}
+					CCSprite *sprite = (CCSprite*)mGameLayer->getChildByTag(i*10 + j);
+					if(sprite != NULL)
+					{
+						float m;
+						if(direct == MOVE_LEFT)
+						{
+							m = -1 * moveLength * (sprite->getContentSize().width + AREA_PX);
+						}
+						else
+						{
+							m = moveLength * (sprite->getContentSize().width + AREA_PX);
+						}
+						CCActionInterval *move = CCMoveBy::create(0.3,ccp(m,0));
+						sprite->runAction(move);
+					}
+				}
+			}
+			break;
+		}
+		case MOVE_DOWN:
+		case MOVE_TOP:
+		{
+				for(int j = 0 ; j < GAME_AREA_ROW;j++)
+			{
+				int moveLength = 0;
+				for(int i = 0 ; i < GAME_AREA_COLUMN;i++)
+				{
+					if(move[i][j] == 1)
+					{
+						moveLength++;
+					}
+					CCSprite *sprite = (CCSprite*)mGameLayer->getChildByTag(i*10 + j);
+					if(sprite != NULL)
+					{
+						float m;
+						if(direct == MOVE_DOWN)
+						{
+							m = -1 * moveLength * (sprite->getContentSize().height + AREA_PX);
+						}
+						else
+						{
+							m = moveLength * (sprite->getContentSize().height + AREA_PX);
+						}
+						CCActionInterval *move = CCMoveBy::create(0.3,ccp(0,m));
+						sprite->runAction(move);
+					}
+				}
+			}
+			break;
+		}
+	}
+	
+}
+
+bool TZFGGameScene::moveOther(int direct)
+{
+	int i = 0;
+	int j = 0;
+	int tempArea[GAME_AREA_ROW][GAME_AREA_COLUMN];
+	int tempMove[GAME_AREA_ROW][GAME_AREA_COLUMN];
+	for (i = 0;i < GAME_AREA_ROW;i++)
+	{
+		for (j = 0;j < GAME_AREA_COLUMN;j++)
+		{
+			tempArea[i][j] = mGameArea[i][j];
+		}
+	}
+	switch(direct)
+	{
+	case MOVE_LEFT:
+		{
+			int n = 0;
+			for(i = 0;i < GAME_AREA_ROW ; i++)
+			{
+				int tempColumn[GAME_AREA_COLUMN];
+				
+				for(n = 0;n < GAME_AREA_COLUMN;n++)
+				{
+					tempColumn[n] = 0;
+					tempMove[i][n] = 0;
+				}
+				n = 0;
+				
+
+				//去0
+				for (j = 0; j < GAME_AREA_COLUMN ;j++)
+				{
+					if(mGameArea[i][j] != 0)
+					{
+						tempColumn[n++] = mGameArea[i][j];
+						
+					}
+					else
+					{
+						tempMove[i][j] = 1;
+					}
+				}
+				//合并
+				for(n = 0;n < GAME_AREA_COLUMN; n++)
+				{
+					if(n < GAME_AREA_COLUMN - 1 && tempColumn[n] == tempColumn[n+1] && tempColumn[n] != 0)
+					{
+						tempColumn[n] = 2*tempColumn[n];
+						tempColumn[n+1] = 0;
+					}
+				}
+				for (j = 0; j < GAME_AREA_COLUMN ;j++)
+				{
+					mGameArea[i][j] = tempColumn[j];
+				}
+
+				for(n = 0;n < GAME_AREA_COLUMN;n++)
+				{
+					tempColumn[n] = 0;
+				}
+				n = 0;
+				//去0
+				for (j = 0; j < GAME_AREA_COLUMN ;j++)
+				{
+					if(mGameArea[i][j] != 0)
+					{
+						tempColumn[n++] = mGameArea[i][j];
+					}
+				}
+				for (j = 0; j < GAME_AREA_COLUMN ;j++)
+				{
+					mGameArea[i][j] = tempColumn[j];
+				}
+			}
+			
+			break;
+		}
+
+	case MOVE_RIGHT:
+		{
+			//移动
+			int n = 0;
+			for(i = 0;i < GAME_AREA_ROW ; i++)
+			{
+				int tempColumn[GAME_AREA_COLUMN];
+				for(n = 0;n < GAME_AREA_COLUMN;n++)
+				{
+					tempColumn[n] = 0;
+					tempMove[i][n] = 0;
+				}
+				n = GAME_AREA_COLUMN - 1;
+				//去0
+				for (j = GAME_AREA_COLUMN - 1; j >= 0 ;j--)
+				{
+					if(mGameArea[i][j] != 0)
+					{
+						tempColumn[n--] = mGameArea[i][j];
+					}
+					else
+					{
+						tempMove[i][j] = 1;
+					}
+				}
+				//合并
+				for(n = GAME_AREA_COLUMN - 1;n >=0; n--)
+				{
+					if(n > 0 && tempColumn[n] == tempColumn[n-1] && tempColumn[n] != 0)
+					{
+						tempColumn[n] = 2*tempColumn[n];
+						tempColumn[n-1] = 0;
+					}
+				}
+
+				for (j = 0; j < GAME_AREA_COLUMN ;j++)
+				{
+					mGameArea[i][j] = tempColumn[j];
+				}
+
+				for(n = 0;n < GAME_AREA_COLUMN;n++)
+				{
+					tempColumn[n] = 0;
+				}
+				n = GAME_AREA_COLUMN - 1;
+				//去0
+				for (j = GAME_AREA_COLUMN - 1; j >= 0 ;j--)
+				{
+					if(mGameArea[i][j] != 0)
+					{
+						tempColumn[n--] = mGameArea[i][j];
+					}
+				}
+				for (j = 0; j < GAME_AREA_COLUMN ;j++)
+				{
+					mGameArea[i][j] = tempColumn[j];
+				}
+			}
+			break;
+		}
+	case MOVE_TOP:
+		{
+			int n = 0;
+			for(j = 0;j < GAME_AREA_COLUMN ; j++)
+			{
+				int tempColumn[GAME_AREA_ROW];
+				for(n = 0;n < GAME_AREA_ROW;n++)
+				{
+					tempColumn[n] = 0;
+					tempMove[j][n] = 0;
+				}
+				n = 0;
+				//去0
+				for (i = 0; i < GAME_AREA_ROW ;i++)
+				{
+					if(mGameArea[i][j] != 0)
+					{
+						tempColumn[n++] = mGameArea[i][j];
+					}
+					else
+					{
+						tempMove[i][j] = 1;
+					}
+				}
+				//合并
+				for(n = 0;n < GAME_AREA_ROW;n++)
+				{
+					if(n < GAME_AREA_ROW - 1 && tempColumn[n] == tempColumn[n+1] && tempColumn[n] != 0)
+					{
+						tempColumn[n] = 2*tempColumn[n];
+						tempColumn[n+1] = 0;
+					}
+				}
+				for (i = 0; i < GAME_AREA_ROW ;i++)
+				{
+					mGameArea[i][j] = tempColumn[i];
+				}
+
+				for(n = 0;n < GAME_AREA_ROW;n++)
+				{
+					tempColumn[n] = 0;
+				}
+				n = 0;
+				//去0
+				for (i = 0; i < GAME_AREA_ROW ;i++)
+				{
+					if(mGameArea[i][j] != 0)
+					{
+						tempColumn[n++] = mGameArea[i][j];
+					}
+				}
+				for (i = 0; i < GAME_AREA_ROW ;i++)
+				{
+					mGameArea[i][j] = tempColumn[i];
+				}
+			}
+			break;
+		}
+	case MOVE_DOWN:
+
+		{
+
+			int n = 0;
+			for(j = 0;j < GAME_AREA_COLUMN ; j++)
+			{
+				int tempColumn[GAME_AREA_ROW];
+				for(n = 0;n < GAME_AREA_ROW;n++)
+				{
+					tempColumn[n] = 0;
+					tempMove[j][n] = 0;
+				}
+				n = GAME_AREA_ROW - 1;
+				//去0
+				for (i = GAME_AREA_ROW - 1; i >= 0 ;i--)
+				{
+					if(mGameArea[i][j] != 0)
+					{
+						tempColumn[n--] = mGameArea[i][j];
+					}
+					else
+					{
+						tempMove[i][j] = 1;
+					}
+				}
+				//合并
+				for(n = GAME_AREA_ROW - 1;n >= 0; n--)
+				{
+					if(n > 0 && tempColumn[n] == tempColumn[n-1] && tempColumn[n] != 0)
+					{
+						tempColumn[n] = 2*tempColumn[n];
+						tempColumn[n-1] = 0;
+					}
+				}
+				for (i = 0; i < GAME_AREA_ROW ;i++)
+				{
+					mGameArea[i][j] = tempColumn[i];
+				}
+
+				for(n = 0;n < GAME_AREA_ROW;n++)
+				{
+					tempColumn[n] = 0;
+				}
+				n = GAME_AREA_ROW - 1;
+				//去0
+				for (i = GAME_AREA_ROW - 1; i >= 0 ;i--)
+				{
+					if(mGameArea[i][j] != 0)
+					{
+						tempColumn[n--] = mGameArea[i][j];
+					}
+				}
+				for (i = 0; i < GAME_AREA_ROW ;i++)
+				{
+					mGameArea[i][j] = tempColumn[i];
+				}
+			}
+			break;
+		}
+	}
+	bool bChange = false;
+	for (i = 0;i < GAME_AREA_ROW;i++)
+	{
+		for (j = 0;j < GAME_AREA_COLUMN;j++)
+		{
+			if(tempArea[i][j] != mGameArea[i][j])
+			{
+				bChange = true;
+				break;
+			}
+		}
+	}
+	if(!bChange)
+		return false;
+	moveAnimation(direct,tempMove);
+	//updateAllArea();
+	return true;
+}
+
 void TZFGGameScene::updateAllArea()
 {
 	//先清除
@@ -450,21 +797,21 @@ void TZFGGameScene::ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent)
 			bool bMove = false;
 			if (mTouchDown.x-touchLocation.x<0&&mTouchDown.x-touchLocation.x<mTouchDown.y-touchLocation.y&&touchLocation.x-mTouchDown.x>mTouchDown.y-touchLocation.y) {  
 				CCLOG("right");  
-				bMove = move(MOVE_RIGHT);
+				bMove = moveOther(MOVE_RIGHT);
 			}  
 			if (mTouchDown.x-touchLocation.x>0&&mTouchDown.x-touchLocation.x>mTouchDown.y-touchLocation.y&&touchLocation.x-mTouchDown.x<mTouchDown.y-touchLocation.y) {  
 				CCLOG("left");  
-				bMove = move(MOVE_LEFT);
+				bMove = moveOther(MOVE_LEFT);
 			}  
 
 			if (mTouchDown.y-touchLocation.y<0&&mTouchDown.y-touchLocation.y<mTouchDown.x-touchLocation.x&&touchLocation.y-mTouchDown.y>mTouchDown.x-touchLocation.x) {  
 				CCLOG("up");  
-				bMove = move(MOVE_TOP);
+				bMove = moveOther(MOVE_TOP);
 
 			}  
 			if (mTouchDown.y-touchLocation.y>0&&mTouchDown.y-touchLocation.y>mTouchDown.x-touchLocation.x&&touchLocation.y-mTouchDown.y<mTouchDown.x-touchLocation.x) {   
 				CCLOG("down"); 
-				bMove = move(MOVE_DOWN);
+				bMove = moveOther(MOVE_DOWN);
 			}  
 			if(bMove)
 				createSprite();
