@@ -48,5 +48,6 @@ private:
 	CCScale9Sprite *mBackgroundSprite;
 	CCPoint mTouchDown;
 	CCSprite *mGameLayer;
+	CCSize mScreenSize;
 };
 #endif

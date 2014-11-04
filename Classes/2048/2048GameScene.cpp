@@ -12,6 +12,7 @@ bool TZFGGameScene::init()
 {
 	setTouchEnabled(true);
 	std::srand((unsigned int)time(0));
+	mScreenSize = CCDirector::sharedDirector()->getWinSize();
 	initLayout();
 	return true;
 }
@@ -29,14 +30,14 @@ void TZFGGameScene::initBackGround()
 	CCSprite* tmp = CCSprite::create("2048/main_layout_background.png");
 	CCSize size = tmp->getContentSize();
 	CCRect fullRect = CCRectMake(0,0, size.width, size.height);
-	CCRect insetRect = CCRectMake(30,30,size.width-60, size.height-60);
+	CCRect insetRect = CCRectMake(10,10,size.width-60, size.height-60);
 	tmp->release();
 	mBackgroundSprite = CCScale9Sprite::create("2048/main_layout_background.png",fullRect,insetRect);
-	mBackgroundSprite->setPreferredSize(CCSizeMake(600,600));
-	mBackgroundSprite->setPosition(parentSize.width/2,parentSize.height/2);
+	mBackgroundSprite->setPreferredSize(CCSizeMake(300,300));
+	mBackgroundSprite->setPosition(parentSize.width/2,parentSize.height/2 - 70);
 	this->addChild(mBackgroundSprite);
 	
-	mGameLayer->setContentSize(CCSizeMake(600,600));
+	mGameLayer->setContentSize(CCSizeMake(300,300));
 
 
 
@@ -83,13 +84,10 @@ void TZFGGameScene::createSprite()
 void TZFGGameScene::showSprite(int row,int column,int numIndex,bool bAnimate)
 {
 	CCSprite *sprite = CCSprite::create();
-	
-	
 
-
-	sprite->setContentSize(ccp(135,135));
+	sprite->setContentSize(ccp(65,65));
 	sprite->setAnchorPoint(ccp(0.5,0.5));
-	sprite->setPosition(ccp(15 + column*sprite->getContentSize().width + column*10 + sprite->getContentSize().width/2,mBackgroundSprite->getContentSize().height - (row+1)*sprite->getContentSize().height - (row+1)*10 +  sprite->getContentSize().height/2));
+	sprite->setPosition(ccp(5 + column*sprite->getContentSize().width + column*10 + sprite->getContentSize().width/2,mBackgroundSprite->getContentSize().height - 65 - (row+1)*sprite->getContentSize().height - (row+1)*10 +  sprite->getContentSize().height/2));
 	
 	ccColor4B color;
 	color.r = gColor[numIndex][0];
@@ -98,7 +96,7 @@ void TZFGGameScene::showSprite(int row,int column,int numIndex,bool bAnimate)
 	color.a = 255;
 
 	CCLayerColor *layerColorBG =CCLayerColor::create(ccColor4B(color));
-	layerColorBG->setContentSize(ccp(130,130));
+	layerColorBG->setContentSize(ccp(65,65));
 	//layerColorBG->setPosition(Point(CardSpriteX,CardSpriteY));  
 
 	sprite->addChild(layerColorBG);
@@ -124,7 +122,7 @@ void TZFGGameScene::showSprite(int row,int column,int numIndex,bool bAnimate)
 	sprintf(str,"%d",text);
 	labelTTF->setString(str);
 	labelTTF->setPosition(ccp(sprite->getContentSize().width/2,sprite->getContentSize().height/2));
-	labelTTF->setFontSize(60);
+	labelTTF->setFontSize(30);
 	
 	sprite->addChild(labelTTF);
 	if (bAnimate)
