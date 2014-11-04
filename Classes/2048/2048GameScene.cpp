@@ -87,7 +87,7 @@ void TZFGGameScene::showSprite(int row,int column,int numIndex,bool bAnimate)
 
 	sprite->setContentSize(ccp(65,65));
 	sprite->setAnchorPoint(ccp(0.5,0.5));
-	sprite->setPosition(ccp(5 + column*sprite->getContentSize().width + column*10 + sprite->getContentSize().width/2,mBackgroundSprite->getContentSize().height - 65 - (row+1)*sprite->getContentSize().height - (row+1)*10 +  sprite->getContentSize().height/2));
+	sprite->setPosition(ccp(10 + column*sprite->getContentSize().width + column*7 + sprite->getContentSize().width/2,mBackgroundSprite->getContentSize().height - 73 - (row+1)*sprite->getContentSize().height - (row+1)*7 +  sprite->getContentSize().height/2));
 	
 	ccColor4B color;
 	color.r = gColor[numIndex][0];

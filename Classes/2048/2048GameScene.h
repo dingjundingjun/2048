@@ -5,16 +5,21 @@
 USING_NS_CC;
 USING_NS_CC_EXT;
 using namespace gui;
+/**游戏方块行数*/
 #define GAME_AREA_ROW 4
+/**游戏方块列数*/
 #define GAME_AREA_COLUMN 4
-
+/**移动方向*/
 #define MOVE_LEFT 0
 #define MOVE_RIGHT 1
 #define MOVE_TOP 2
 #define MOVE_DOWN 3
-
+/**出现的数字*/
 static int NUM[2] = {2,4};
 static char* gNumRes[] = {"2048/num_2.png","2048/num_4.png","2048/num_8.png","2048/num_16.png","2048/num_32.png","2048/num_2.png","2048/num_4.png","2048/num_8.png","2048/num_16.png","2048/num_32.png","2048/num_2.png","2048/num_4.png"};
+/**各种数字的背景色
+依次为2,4,8,16,32,64,128,256,512,1024,2048,4096
+*/
 static int gColor[][3] = {{230,223,208},{208,201,188},{217,144,83},{230,133,82},{203,188,150},{230,223,208},{208,201,188},{217,144,83},{230,133,82},{203,188,150},{203,188,150},{230,223,208}};
 class TZFGGameScene : public cocos2d::CCLayer
 {
@@ -34,6 +39,7 @@ public:
 	void createSprite();
 	/**清空方块*/
 	void clearArea();
+	/**显示方块*/
 	void showSprite(int row,int column,int num,bool bAnimate);
 	/**移动方块*/
 	bool move(int direct);
@@ -48,6 +54,7 @@ private:
 	CCScale9Sprite *mBackgroundSprite;
 	CCPoint mTouchDown;
 	CCSprite *mGameLayer;
+	/**屏幕大小*/
 	CCSize mScreenSize;
 };
 #endif
