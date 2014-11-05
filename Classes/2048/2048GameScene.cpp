@@ -399,6 +399,11 @@ bool TZFGGameScene::move(int direct)
 	return true;
 }
 
+void TZFGGameScene::moveCallback()
+{
+	CCLOG("moveCallback");
+}
+
 void TZFGGameScene::moveAnimation(int direct,int move[4][4])
 {
 	switch(direct)
@@ -427,8 +432,9 @@ void TZFGGameScene::moveAnimation(int direct,int move[4][4])
 						{
 							m = moveLength * (sprite->getContentSize().width + AREA_PX);
 						}
-						CCActionInterval *move = CCMoveBy::create(0.3,ccp(m,0));
-						sprite->runAction(move);
+						CCActionInterval *move = CCMoveBy::create(0.1,ccp(m,0));
+						CCFiniteTimeAction *ccFiniteAction = CCSpawn::create(move,CCCallFunc::create(this,callfunc_selector(TZFGGameScene::moveCallback)),NULL);
+						sprite->runAction(ccFiniteAction);
 					}
 				}
 			}
@@ -458,8 +464,9 @@ void TZFGGameScene::moveAnimation(int direct,int move[4][4])
 						{
 							m = moveLength * (sprite->getContentSize().height + AREA_PX);
 						}
-						CCActionInterval *move = CCMoveBy::create(0.3,ccp(0,m));
-						sprite->runAction(move);
+						CCActionInterval *move = CCMoveBy::create(0.1,ccp(0,m));
+						CCFiniteTimeAction *ccFiniteAction = CCSpawn::create(move,CCCallFunc::create(this,callfunc_selector(TZFGGameScene::moveCallback)),NULL);
+						sprite->runAction(ccFiniteAction);
 					}
 				}
 			}

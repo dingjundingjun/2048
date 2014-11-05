@@ -55,6 +55,8 @@ public:
 	double distance(CCPoint pt1,CCPoint pt2);
 	/**判断是否结束游戏*/
 	bool isGameOver();
+	/**移动结束回调*/
+	void moveCallback();
 private:
 	int mGameArea[GAME_AREA_ROW][GAME_AREA_COLUMN];
 	CCScale9Sprite *mBackgroundSprite;
