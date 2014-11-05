@@ -12,6 +12,7 @@ bool TZFGGameScene::init()
 {
 	setTouchEnabled(true);
 	std::srand((unsigned int)time(0));
+	mAreaMoveSpeed = 0.15;
 	mScreenSize = CCDirector::sharedDirector()->getWinSize();
 	initLayout();
 	return true;
@@ -401,17 +402,22 @@ bool TZFGGameScene::move(int direct)
 
 void TZFGGameScene::moveCallback()
 {
-	CCLOG("moveCallback");
+	if(bUpdate)
+	{
+		CCLOG("moveCallback");
+		updateAllArea();
+		bUpdate = false;
+	}
 }
 
 void TZFGGameScene::moveAnimation(int direct,int move[4][4])
 {
+	bUpdate = true;
 	switch(direct)
 	{
 		case MOVE_LEFT:
-		case MOVE_RIGHT:
-		{
-			for(int i = 0 ; i < GAME_AREA_ROW;i++)
+			{
+				for(int i = 0 ; i < GAME_AREA_ROW;i++)
 			{
 				int moveLength = 0;
 				for(int j = 0 ; j < GAME_AREA_COLUMN;j++)
@@ -424,29 +430,23 @@ void TZFGGameScene::moveAnimation(int direct,int move[4][4])
 					if(sprite != NULL)
 					{
 						float m;
-						if(direct == MOVE_LEFT)
-						{
-							m = -1 * moveLength * (sprite->getContentSize().width + AREA_PX);
-						}
-						else
-						{
-							m = moveLength * (sprite->getContentSize().width + AREA_PX);
-						}
-						CCActionInterval *move = CCMoveBy::create(0.1,ccp(m,0));
-						CCFiniteTimeAction *ccFiniteAction = CCSpawn::create(move,CCCallFunc::create(this,callfunc_selector(TZFGGameScene::moveCallback)),NULL);
+						m = -1 * moveLength * (sprite->getContentSize().width + AREA_PX);
+						CCLOG("sprite i = %d,j=%d,m = %f",i,j,m);
+						CCActionInterval *move = CCMoveBy::create(mAreaMoveSpeed,ccp(m,0));
+						CCFiniteTimeAction *ccFiniteAction = CCSequence::create(move,CCCallFunc::create(this,callfunc_selector(TZFGGameScene::moveCallback)),NULL);
 						sprite->runAction(ccFiniteAction);
 					}
 				}
 			}
 			break;
-		}
-		case MOVE_DOWN:
-		case MOVE_TOP:
+				break;
+			}
+		case MOVE_RIGHT:
 		{
-				for(int j = 0 ; j < GAME_AREA_ROW;j++)
+			for(int i = 0 ; i < GAME_AREA_ROW;i++)
 			{
 				int moveLength = 0;
-				for(int i = 0 ; i < GAME_AREA_COLUMN;i++)
+				for(int j = GAME_AREA_COLUMN - 1 ; j >= 0;j--)
 				{
 					if(move[i][j] == 1)
 					{
@@ -456,16 +456,62 @@ void TZFGGameScene::moveAnimation(int direct,int move[4][4])
 					if(sprite != NULL)
 					{
 						float m;
-						if(direct == MOVE_DOWN)
-						{
-							m = -1 * moveLength * (sprite->getContentSize().height + AREA_PX);
-						}
-						else
-						{
-							m = moveLength * (sprite->getContentSize().height + AREA_PX);
-						}
-						CCActionInterval *move = CCMoveBy::create(0.1,ccp(0,m));
-						CCFiniteTimeAction *ccFiniteAction = CCSpawn::create(move,CCCallFunc::create(this,callfunc_selector(TZFGGameScene::moveCallback)),NULL);
+						m = moveLength * (sprite->getContentSize().width + AREA_PX);
+						CCLOG("sprite i = %d,j=%d,m = %f",i,j,m);
+						CCActionInterval *move = CCMoveBy::create(mAreaMoveSpeed,ccp(m,0));
+						CCFiniteTimeAction *ccFiniteAction = CCSequence::create(move,CCCallFunc::create(this,callfunc_selector(TZFGGameScene::moveCallback)),NULL);
+						sprite->runAction(ccFiniteAction);
+					}
+				}
+			}
+			break;
+		}
+		case MOVE_DOWN:
+			{
+				for(int j = 0 ; j < GAME_AREA_ROW;j++)
+			{
+				int moveLength = 0;
+				for(int i = GAME_AREA_COLUMN - 1 ; i >= 0 ;i--)
+				{
+					CCLOG("sprite i = %d,j=%d,move = %d",i,j,move[i][j]);
+					if(move[i][j] == 1)
+					{
+						moveLength++;
+					}
+					CCSprite *sprite = (CCSprite*)mGameLayer->getChildByTag(i*10 + j);
+					if(sprite != NULL)
+					{
+						float m;
+						m = -1 * moveLength * (sprite->getContentSize().height + AREA_PX);
+						CCLOG("sprite i = %d,j=%d,m = %d",i,j,moveLength);
+						CCActionInterval *move = CCMoveBy::create(mAreaMoveSpeed,ccp(0,m));
+						CCFiniteTimeAction *ccFiniteAction = CCSequence::create(move,CCCallFunc::create(this,callfunc_selector(TZFGGameScene::moveCallback)),NULL);
+						sprite->runAction(ccFiniteAction);
+					}
+				}
+			}
+				break;
+			}
+		case MOVE_TOP:
+		{
+				for(int j = 0 ; j < GAME_AREA_ROW;j++)
+			{
+				int moveLength = 0;
+				for(int i = 0 ; i < GAME_AREA_COLUMN;i++)
+				{
+					CCLOG("sprite i = %d,j=%d,move = %d",i,j,move[i][j]);
+					if(move[i][j] == 1)
+					{
+						moveLength++;
+					}
+					CCSprite *sprite = (CCSprite*)mGameLayer->getChildByTag(i*10 + j);
+					if(sprite != NULL)
+					{
+						float m;
+						m = moveLength * (sprite->getContentSize().height + AREA_PX);
+						CCLOG("sprite i = %d,j=%d,m = %d",i,j,moveLength);
+						CCActionInterval *move = CCMoveBy::create(mAreaMoveSpeed,ccp(0,m));
+						CCFiniteTimeAction *ccFiniteAction = CCSequence::create(move,CCCallFunc::create(this,callfunc_selector(TZFGGameScene::moveCallback)),NULL);
 						sprite->runAction(ccFiniteAction);
 					}
 				}
@@ -512,7 +558,6 @@ bool TZFGGameScene::moveOther(int direct)
 					if(mGameArea[i][j] != 0)
 					{
 						tempColumn[n++] = mGameArea[i][j];
-						
 					}
 					else
 					{
@@ -624,21 +669,25 @@ bool TZFGGameScene::moveOther(int direct)
 				for(n = 0;n < GAME_AREA_ROW;n++)
 				{
 					tempColumn[n] = 0;
-					tempMove[j][n] = 0;
+					tempMove[n][j] = 0;
 				}
 				n = 0;
 				//去0
 				for (i = 0; i < GAME_AREA_ROW ;i++)
 				{
+					//CCLOG("move  i = %d,j=%d,gamearea = %d",i,j,mGameArea[i][j]);
 					if(mGameArea[i][j] != 0)
 					{
 						tempColumn[n++] = mGameArea[i][j];
 					}
 					else
 					{
+						
 						tempMove[i][j] = 1;
+						CCLOG("tempMove  i = %d,j=%d,area = %d",i,j,tempMove[i][j]);
 					}
 				}
+				CCLOG("tempMove  i = %d,j=%d,area = %d",i,j,tempMove[1][1]);
 				//合并
 				for(n = 0;n < GAME_AREA_ROW;n++)
 				{
@@ -676,7 +725,6 @@ bool TZFGGameScene::moveOther(int direct)
 	case MOVE_DOWN:
 
 		{
-
 			int n = 0;
 			for(j = 0;j < GAME_AREA_COLUMN ; j++)
 			{
@@ -684,7 +732,7 @@ bool TZFGGameScene::moveOther(int direct)
 				for(n = 0;n < GAME_AREA_ROW;n++)
 				{
 					tempColumn[n] = 0;
-					tempMove[j][n] = 0;
+					tempMove[n][j] = 0;
 				}
 				n = GAME_AREA_ROW - 1;
 				//去0
@@ -699,6 +747,7 @@ bool TZFGGameScene::moveOther(int direct)
 						tempMove[i][j] = 1;
 					}
 				}
+				CCLOG("tempMove  i = %d,j=%d,area = %d",i,j,tempMove[1][1]);
 				//合并
 				for(n = GAME_AREA_ROW - 1;n >= 0; n--)
 				{

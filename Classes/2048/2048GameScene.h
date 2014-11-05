@@ -64,5 +64,9 @@ private:
 	CCSprite *mGameLayer;
 	/**屏幕大小*/
 	CCSize mScreenSize;
+	/**保证只刷新一次*/
+	bool bUpdate;
+	/**方块移动速度*/
+	float mAreaMoveSpeed;
 };
 #endif
