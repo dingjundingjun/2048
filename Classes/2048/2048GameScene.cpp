@@ -1,4 +1,5 @@
 #include "2048GameScene.h"
+#include "GameOver.h"
 
 CCScene* TZFGGameScene::scene()
 {
@@ -13,6 +14,8 @@ bool TZFGGameScene::init()
 	setTouchEnabled(true);
 	std::srand((unsigned int)time(0));
 	mAreaMoveSpeed = 0.15;
+	mScoreTotal = 0;
+	mAddScore = 0;
 	mScreenSize = CCDirector::sharedDirector()->getWinSize();
 	initLayout();
 	return true;
@@ -37,14 +40,18 @@ void TZFGGameScene::initBackGround()
 	mBackgroundSprite->setPreferredSize(CCSizeMake(300,300));
 	mBackgroundSprite->setPosition(parentSize.width/2,parentSize.height/2 - 70);
 	this->addChild(mBackgroundSprite);
-	
 	mGameLayer->setContentSize(CCSizeMake(300,300));
-
-
-
 	mGameLayer->setPosition(ccp(parentSize.width/2,parentSize.height/2));
-	
 	this->addChild(mGameLayer);
+
+	mScoreBar = CCLabelTTF::create("0","Marker Felt",30);
+	ccColor3B c0;  
+	c0.r=0;  
+	c0.g=0;  
+	c0.b=0;
+	mScoreBar->setColor(c0);
+	mScoreBar->setPosition(ccp(parentSize.width/2,parentSize.height - 70));
+	this->addChild(mScoreBar);
 
 	clearArea();
 	createSprite();
@@ -77,9 +84,14 @@ void TZFGGameScene::createSprite()
 	showSprite(index_row,index_column,numIndex,true);
 	if(isGameOver())
 	{
-		CCDirector::sharedDirector()->end();
+		goToGameOverScene();
 	}
+}
 
+void TZFGGameScene::goToGameOverScene()
+{
+	CCScene *pScene = GameOverScene::scene();
+	CCDirector::sharedDirector()->replaceScene(pScene);
 }
 
 void TZFGGameScene::showSprite(int row,int column,int numIndex,bool bAnimate)
@@ -400,6 +412,18 @@ bool TZFGGameScene::move(int direct)
 	return true;
 }
 
+void TZFGGameScene::updateScoreBar()
+{
+	mScoreTotal += mAddScore;
+	char str[10];
+	memset(str,0,10);
+	sprintf(str,"%d",mScoreTotal);
+	mScoreBar->setString(str);
+	mAddScore = 0;
+
+	goToGameOverScene();
+}
+
 void TZFGGameScene::moveCallback()
 {
 	if(bUpdate)
@@ -407,6 +431,11 @@ void TZFGGameScene::moveCallback()
 		CCLOG("moveCallback");
 		updateAllArea();
 		bUpdate = false;
+		createSprite();
+		if(mAddScore != 0)
+		{
+			updateScoreBar();
+		}
 	}
 }
 
@@ -571,6 +600,7 @@ bool TZFGGameScene::moveOther(int direct)
 					{
 						tempColumn[n] = 2*tempColumn[n];
 						tempColumn[n+1] = 0;
+						mAddScore += tempColumn[n];
 					}
 				}
 				for (j = 0; j < GAME_AREA_COLUMN ;j++)
@@ -631,6 +661,7 @@ bool TZFGGameScene::moveOther(int direct)
 					if(n > 0 && tempColumn[n] == tempColumn[n-1] && tempColumn[n] != 0)
 					{
 						tempColumn[n] = 2*tempColumn[n];
+						mAddScore += tempColumn[n];
 						tempColumn[n-1] = 0;
 					}
 				}
@@ -694,6 +725,7 @@ bool TZFGGameScene::moveOther(int direct)
 					if(n < GAME_AREA_ROW - 1 && tempColumn[n] == tempColumn[n+1] && tempColumn[n] != 0)
 					{
 						tempColumn[n] = 2*tempColumn[n];
+						mAddScore += tempColumn[n];
 						tempColumn[n+1] = 0;
 					}
 				}
@@ -754,6 +786,7 @@ bool TZFGGameScene::moveOther(int direct)
 					if(n > 0 && tempColumn[n] == tempColumn[n-1] && tempColumn[n] != 0)
 					{
 						tempColumn[n] = 2*tempColumn[n];
+						mAddScore += tempColumn[n];
 						tempColumn[n-1] = 0;
 					}
 				}
@@ -869,8 +902,10 @@ void TZFGGameScene::ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent)
 				CCLOG("down"); 
 				bMove = moveOther(MOVE_DOWN);
 			}  
+			/*
 			if(bMove)
 				createSprite();
+				*/
 		}  
 }
 

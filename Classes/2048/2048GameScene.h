@@ -22,7 +22,7 @@ static char* gNumRes[] = {"2048/num_2.png","2048/num_4.png","2048/num_8.png","20
 /**各种数字的背景色
 依次为2,4,8,16,32,64,128,256,512,1024,2048,4096
 */
-static int gColor[][3] = {{230,223,208},{208,201,188},{217,144,83},{230,133,82},{203,188,150},{230,223,208},{208,201,188},{217,144,83},{230,133,82},{203,188,150},{203,188,150},{230,223,208}};
+static int gColor[][3] = {{230,223,208},{221,224,158},{225,136,38},{230,113,34},{230,91,22},{238,47,26},{232,232,32},{248,236,16},{248,236,16},{248,236,16},{248,236,16},{248,236,16}};
 class TZFGGameScene : public cocos2d::CCLayer
 {
 public:
@@ -57,6 +57,10 @@ public:
 	bool isGameOver();
 	/**移动结束回调*/
 	void moveCallback();
+	/**更新分数*/
+	void updateScoreBar();
+	/**跳转到结束界面*/
+	void goToGameOverScene();
 private:
 	int mGameArea[GAME_AREA_ROW][GAME_AREA_COLUMN];
 	CCScale9Sprite *mBackgroundSprite;
@@ -68,5 +72,12 @@ private:
 	bool bUpdate;
 	/**方块移动速度*/
 	float mAreaMoveSpeed;
+	/**显示分数*/
+	CCLabelTTF *mScoreBar;
+	/**总分数*/
+	int mScoreTotal;
+	/**增加的分数*/
+	int mAddScore;
+
 };
 #endif
