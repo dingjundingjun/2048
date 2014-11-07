@@ -1,5 +1,8 @@
 #ifndef _2048_GAME_SCENE_H
 #define _2048_GAME_SCENE_H
+
+
+
 #include "cocos2d.h"
 #include "cocos-ext.h"
 USING_NS_CC;
@@ -16,6 +19,11 @@ using namespace gui;
 #define MOVE_DOWN 3
 
 #define AREA_PX  7
+
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+#include "platform/android/jni/JniHelper.h"
+#endif
+
 /**出现的数字*/
 static int NUM[2] = {2,4};
 static char* gNumRes[] = {"2048/num_2.png","2048/num_4.png","2048/num_8.png","2048/num_16.png","2048/num_32.png","2048/num_2.png","2048/num_4.png","2048/num_8.png","2048/num_16.png","2048/num_32.png","2048/num_2.png","2048/num_4.png"};
@@ -32,6 +40,7 @@ public:
 	virtual void ccTouchesBegan(CCSet *pTouches, CCEvent *pEvent);
 	virtual void ccTouchesMoved(CCSet *pTouches, CCEvent *pEvent);
 	virtual void ccTouchesEnded(CCSet *pTouches, CCEvent *pEvent);
+	virtual void keyBackClicked();
 
 	/**初始化所有布局*/
 	void initLayout();
@@ -61,6 +70,11 @@ public:
 	void updateScoreBar();
 	/**跳转到结束界面*/
 	void goToGameOverScene();
+	/**获取最高分数*/
+	int getGameBestScore();
+	/**设置最高分数*/
+	void setGameBestScore(int score);
+
 private:
 	int mGameArea[GAME_AREA_ROW][GAME_AREA_COLUMN];
 	CCScale9Sprite *mBackgroundSprite;
@@ -78,6 +92,8 @@ private:
 	int mScoreTotal;
 	/**增加的分数*/
 	int mAddScore;
+	/**最高分数*/
+	int mBestScore;
 
 };
 #endif

@@ -1,6 +1,5 @@
 #include "2048GameScene.h"
 #include "GameOver.h"
-
 CCScene* TZFGGameScene::scene()
 {
 	CCScene* scene = CCScene::create();
@@ -12,10 +11,14 @@ CCScene* TZFGGameScene::scene()
 bool TZFGGameScene::init()
 {
 	setTouchEnabled(true);
+	setKeypadEnabled(true);
 	std::srand((unsigned int)time(0));
 	mAreaMoveSpeed = 0.15;
 	mScoreTotal = 0;
 	mAddScore = 0;
+	setGameBestScore(123456);
+	mBestScore = getGameBestScore();
+	CCLOG("game besssssssss = %d",mBestScore);
 	mScreenSize = CCDirector::sharedDirector()->getWinSize();
 	initLayout();
 	return true;
@@ -34,7 +37,7 @@ void TZFGGameScene::initBackGround()
 	CCSprite* tmp = CCSprite::create("2048/main_layout_background.png");
 	CCSize size = tmp->getContentSize();
 	CCRect fullRect = CCRectMake(0,0, size.width, size.height);
-	CCRect insetRect = CCRectMake(10,10,size.width-60, size.height-60);
+	CCRect insetRect = CCRectMake(0,0,size.width, size.height);
 	tmp->release();
 	mBackgroundSprite = CCScale9Sprite::create("2048/main_layout_background.png",fullRect,insetRect);
 	mBackgroundSprite->setPreferredSize(CCSizeMake(300,300));
@@ -421,7 +424,7 @@ void TZFGGameScene::updateScoreBar()
 	mScoreBar->setString(str);
 	mAddScore = 0;
 
-	goToGameOverScene();
+	//goToGameOverScene();
 }
 
 void TZFGGameScene::moveCallback()
@@ -437,6 +440,11 @@ void TZFGGameScene::moveCallback()
 			updateScoreBar();
 		}
 	}
+}
+
+void TZFGGameScene::keyBackClicked()
+{
+	CCDirector::sharedDirector()->end();
 }
 
 void TZFGGameScene::moveAnimation(int direct,int move[4][4])
@@ -931,4 +939,43 @@ bool TZFGGameScene::isGameOver()
 		}
 	return bFull;
 }
+
+int TZFGGameScene::getGameBestScore()
+{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+	JniMethodInfo t;
+	CCLOG("getData_ ==========  ");
+	if (JniHelper::getMethodInfo(t, "com/jy/jytzfegame/GameDataControl", "getBestScore", "()I")) {
+		jclass header_class = t.env->FindClass("com/jy/jytzfegame/GameDataControl");
+		jmethodID init_id = t.env->GetStaticMethodID( header_class, "getInstance", "()Lcom/jy/jytzfegame/GameDataControl;");
+		CCLOG("get best init_id = %d",init_id);
+		jobject header_object = t.env->CallStaticObjectMethod(header_class, init_id);
+		jmethodID getBestScoreID = t.env->GetMethodID(header_class,"getBestScore","()I");
+		int score = t.env->CallIntMethod(header_object,getBestScoreID);
+		CCLOG("get best score = %d",score);
+		return score;
+	}
+#endif
+	return 1111;
+}
+
+
+void TZFGGameScene::setGameBestScore(int score)
+{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+	JniMethodInfo t;
+	CCLOG("getData_ ==========  ");
+	if (JniHelper::getMethodInfo(t, "com/jy/jytzfegame/GameDataControl", "setBestScore", "(I)I")) {
+		jclass header_class = t.env->FindClass("com/jy/jytzfegame/GameDataControl");
+		jmethodID init_id = t.env->GetStaticMethodID( header_class, "getInstance", "()Lcom/jy/jytzfegame/GameDataControl;");
+		CCLOG("get best init_id = %d",init_id);
+		jobject header_object = t.env->CallStaticObjectMethod(header_class, init_id);
+		jmethodID getBestScoreID = t.env->GetMethodID(header_class,"setBestScore","(I)I");
+		t.env->CallIntMethod(header_object,getBestScoreID,score);
+		CCLOG("get best score = %d",score);
+	}
+#endif
+}
+
+
 

@@ -12,6 +12,7 @@ CCScene* GameOverScene::scene()
 bool GameOverScene::init()
 {
 	setTouchEnabled(true);
+	setKeypadEnabled(true);
 	std::srand((unsigned int)time(0));
 	initLayout();
 	return true;
@@ -51,4 +52,9 @@ void GameOverScene::switchBtnReStart(CCObject* sender, TouchEventType type)
 	default:
 		break;
 	}
+}
+
+void GameOverScene::keyBackClicked()
+{
+	CCDirector::sharedDirector()->end();
 }

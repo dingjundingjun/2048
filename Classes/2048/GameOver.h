@@ -12,6 +12,7 @@ public:
 	bool virtual init();
 	CREATE_FUNC(GameOverScene);
 	static CCScene* scene();
+	virtual void keyBackClicked();
 
 	/**初始化所有布局*/
 	void initLayout();

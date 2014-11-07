@@ -18,18 +18,19 @@ bool AppDelegate::applicationDidFinishLaunching() {
     CCEGLView* pEGLView = CCEGLView::sharedOpenGLView();
 	
     pDirector->setOpenGLView(pEGLView);
-	glClearColor(255,255,55,255);
+	
 	CCSize screenSize = CCEGLView::sharedOpenGLView()->getFrameSize();
-	CCSize designSize = CCSizeMake(320,480);
+	CCSize designSize = CCSizeMake(768,1024);
 	CCLOG("screenSize width = %f,heigh = %f",screenSize.width,screenSize.height);
 	//CCEGLView::sharedOpenGLView()->setDesignResolutionSize(screenSize.width, screenSize.height, kResolutionExactFit);
 	//CCEGLView::sharedOpenGLView()->setDesignResolutionSize(screenSize.width, screenSize.height, kResolutionShowAll);
 	//CCEGLView::sharedOpenGLView()->setDesignResolutionSize(screenSize.width, screenSize.height, kResolutionNoBorder);
 	//CCEGLView::sharedOpenGLView()->setDesignResolutionSize(screenSize.width, screenSize.height, kResolutionFixedHeight);
 	//CCEGLView::sharedOpenGLView()->setDesignResolutionSize(screenSize.width, screenSize.height, kResolutionFixedWidth);
-
+	
 	pDirector->setContentScaleFactor(designSize.height/screenSize.height);
-
+	//pEGLView->setDesignResolutionSize(designSize.width, designSize.height, kResolutionNoBorder);
+	glClearColor(255,255,55,255);
     // turn on display FPS
     //pDirector->setDisplayStats(true);
 
