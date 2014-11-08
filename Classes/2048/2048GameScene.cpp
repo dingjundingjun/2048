@@ -16,7 +16,6 @@ bool TZFGGameScene::init()
 	mAreaMoveSpeed = 0.15;
 	mScoreTotal = 0;
 	mAddScore = 0;
-	setGameBestScore(123456);
 	mBestScore = getGameBestScore();
 	CCLOG("game besssssssss = %d",mBestScore);
 	mScreenSize = CCDirector::sharedDirector()->getWinSize();
@@ -40,22 +39,46 @@ void TZFGGameScene::initBackGround()
 	CCRect insetRect = CCRectMake(0,0,size.width, size.height);
 	tmp->release();
 	mBackgroundSprite = CCScale9Sprite::create("2048/main_layout_background.png",fullRect,insetRect);
-	mBackgroundSprite->setPreferredSize(CCSizeMake(300,300));
-	mBackgroundSprite->setPosition(parentSize.width/2,parentSize.height/2 - 70);
+	mBackgroundSprite->setPreferredSize(CCSizeMake(700,700));
+	mBackgroundSprite->setPosition(parentSize.width/2,parentSize.height/2 -5);
 	this->addChild(mBackgroundSprite);
-	mGameLayer->setContentSize(CCSizeMake(300,300));
-	mGameLayer->setPosition(ccp(parentSize.width/2,parentSize.height/2));
+	mGameLayer->setContentSize(CCSizeMake(700,700));
+	mGameLayer->setPosition(ccp(parentSize.width/2,parentSize.height/2 + 65));
 	this->addChild(mGameLayer);
 
-	mScoreBar = CCLabelTTF::create("0","Marker Felt",30);
+	CCSprite *logoSprite = CCSprite::create("2048/logo.png");
+	logoSprite->setAnchorPoint(ccp(0.5,0.5));
+	logoSprite->setPosition(ccp(logoSprite->getContentSize().width / 2 + 30,parentSize.height - logoSprite->getContentSize().height/2 - 25));
+	this->addChild(logoSprite);
+
+	CCSprite *scoreSprite = CCSprite::create("2048/fenshu.png");
+	scoreSprite->setAnchorPoint(ccp(0.5,0.5));
+	scoreSprite->setPosition(ccp(scoreSprite->getContentSize().width / 2 + 280,parentSize.height - scoreSprite->getContentSize().height/2 - 25));
+	this->addChild(scoreSprite);
+
+	CCSprite *bestSprite = CCSprite::create("2048/lishi.png");
+	bestSprite->setAnchorPoint(ccp(0.5,0.5));
+	bestSprite->setPosition(ccp(bestSprite->getContentSize().width / 2 + 510,parentSize.height - bestSprite->getContentSize().height/2 - 25));
+	this->addChild(bestSprite);
+
+	mScoreBar = CCLabelTTF::create("0","Marker Felt",40);
 	ccColor3B c0;  
-	c0.r=0;  
-	c0.g=0;  
-	c0.b=0;
+	c0.r=255;  
+	c0.g=255;  
+	c0.b=255;
 	mScoreBar->setColor(c0);
-	mScoreBar->setPosition(ccp(parentSize.width/2,parentSize.height - 70));
+	mScoreBar->setPosition(ccp(scoreSprite->getPosition().x,parentSize.height - 110));
 	this->addChild(mScoreBar);
 
+	mBestScoreBar = CCLabelTTF::create("0","Marker Felt",40);
+	mBestScoreBar->setColor(c0);
+	mBestScoreBar->setPosition(ccp(bestSprite->getPosition().x,parentSize.height - 110));
+	char str[10];
+	memset(str,0,10);
+	sprintf(str,"%d",mBestScore);
+	mBestScoreBar->setString(str);
+
+	this->addChild(mBestScoreBar);
 	clearArea();
 	createSprite();
 	createSprite();
@@ -87,6 +110,10 @@ void TZFGGameScene::createSprite()
 	showSprite(index_row,index_column,numIndex,true);
 	if(isGameOver())
 	{
+		if(mScoreTotal > mBestScore)
+		{
+			setGameBestScore(mScoreTotal);
+		}
 		goToGameOverScene();
 	}
 }
@@ -101,9 +128,9 @@ void TZFGGameScene::showSprite(int row,int column,int numIndex,bool bAnimate)
 {
 	CCSprite *sprite = CCSprite::create();
 
-	sprite->setContentSize(ccp(65,65));
+	sprite->setContentSize(ccp(160,160));
 	sprite->setAnchorPoint(ccp(0.5,0.5));
-	sprite->setPosition(ccp(10 + column*sprite->getContentSize().width + column*AREA_PX + sprite->getContentSize().width/2,mBackgroundSprite->getContentSize().height - 73 - (row+1)*sprite->getContentSize().height - (row+1)*AREA_PX +  sprite->getContentSize().height/2));
+	sprite->setPosition(ccp(20 + column*sprite->getContentSize().width + column*AREA_PX + sprite->getContentSize().width/2,mBackgroundSprite->getContentSize().height - 83 - (row+1)*sprite->getContentSize().height - (row+1)*AREA_PX +  sprite->getContentSize().height/2));
 	
 	ccColor4B color;
 	color.r = gColor[numIndex][0];
@@ -112,7 +139,7 @@ void TZFGGameScene::showSprite(int row,int column,int numIndex,bool bAnimate)
 	color.a = 255;
 
 	CCLayerColor *layerColorBG =CCLayerColor::create(ccColor4B(color));
-	layerColorBG->setContentSize(ccp(65,65));
+	layerColorBG->setContentSize(ccp(160,160));
 	//layerColorBG->setPosition(Point(CardSpriteX,CardSpriteY));  
 
 	sprite->addChild(layerColorBG);
@@ -423,8 +450,6 @@ void TZFGGameScene::updateScoreBar()
 	sprintf(str,"%d",mScoreTotal);
 	mScoreBar->setString(str);
 	mAddScore = 0;
-
-	//goToGameOverScene();
 }
 
 void TZFGGameScene::moveCallback()

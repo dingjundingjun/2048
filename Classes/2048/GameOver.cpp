@@ -22,30 +22,44 @@ void GameOverScene::initLayout()
 {
 	CCSize mScreenSize = CCDirector::sharedDirector()->getWinSize();
 	mLayer = UILayer::create();
-	this->addChild(mLayer);
-	UIButton *b = UIButton::create();
-	b->setTitleText("restart");
-	b->setTitleFontName("Marker Felt");
-	ccColor3B c0;  
-	c0.r=0;  
-	c0.g=0;  
-	c0.b=0;
-	b->setTitleColor(c0);
-	b->setTitleFontSize(30);
-	b->setPosition(ccp(mScreenSize.width/2,mScreenSize.height/2));
-	b->addTouchEventListener(this, toucheventselector(GameOverScene::switchBtnReStart));
-	mLayer->addWidget(b);
+
+	UIButton *btnRestart = UIButton::create();
+	btnRestart->setTouchEnabled(true);
+	btnRestart->loadTextures("2048/restar.png", "2048/restar_press.png","");  
+	btnRestart->setPosition(ccp(mScreenSize.width/2,mScreenSize.height/2 + 50));
+	btnRestart->addTouchEventListener(this, toucheventselector(GameOverScene::switchBtn));
+	btnRestart->setTag(BTN_RESTART);
+	mLayer->addWidget(btnRestart);
+
+	UIButton *btnExit = UIButton::create();
+	btnExit->setTouchEnabled(true);
+	btnExit->loadTextures("2048/exit.png", "2048/exit_press.png","");  
+	btnExit->setPosition(ccp(mScreenSize.width/2,mScreenSize.height/2 - 50));
+	btnExit->addTouchEventListener(this, toucheventselector(GameOverScene::switchBtn));
+	btnExit->setTag(BTN_EXIT);
+	mLayer->addWidget(btnExit);
+
+	this->addChild(mLayer,1);
 }
 
-void GameOverScene::switchBtnReStart(CCObject* sender, TouchEventType type)
+void GameOverScene::switchBtn(CCObject* sender, TouchEventType type)
 {
 	CCLOG("switchBtnReStart");
 	switch (type)
 	{
 	case TOUCH_EVENT_ENDED:
 		{
-			CCScene *pScene = TZFGGameScene::scene();
-			CCDirector::sharedDirector()->replaceScene(pScene);
+			UIButton *btn = (UIButton*)sender;
+			int tag = btn->getTag();
+			if(tag == BTN_RESTART)
+			{
+				CCScene *pScene = TZFGGameScene::scene();
+				CCDirector::sharedDirector()->replaceScene(pScene);
+			}
+			else if(tag == BTN_EXIT)
+			{
+				CCDirector::sharedDirector()->end();
+			}
 		}
 		break;
 

@@ -88,6 +88,8 @@ private:
 	float mAreaMoveSpeed;
 	/**显示分数*/
 	CCLabelTTF *mScoreBar;
+	/**显示最高分数*/
+	CCLabelTTF *mBestScoreBar;
 	/**总分数*/
 	int mScoreTotal;
 	/**增加的分数*/

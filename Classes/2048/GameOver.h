@@ -6,6 +6,8 @@ USING_NS_CC;
 USING_NS_CC_EXT;
 using namespace gui;
 
+#define BTN_RESTART 0
+#define BTN_EXIT 1
 class GameOverScene : public cocos2d::CCLayer
 {
 public:
@@ -17,7 +19,7 @@ public:
 	/**初始化所有布局*/
 	void initLayout();
 	/**重新开始监听*/
-	void switchBtnReStart(CCObject* sender, TouchEventType type);
+	void switchBtn(CCObject* sender, TouchEventType type);
 private:
 	/**控件层*/
 	UILayer *mLayer;
