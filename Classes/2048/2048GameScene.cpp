@@ -61,14 +61,20 @@ void TZFGGameScene::initBackGround()
 	bestSprite->setPosition(ccp(bestSprite->getContentSize().width / 2 + 510,parentSize.height - bestSprite->getContentSize().height/2 - 25));
 	this->addChild(bestSprite);
 
-	mScoreBar = CCLabelTTF::create("0","Marker Felt",40);
+	mScoreBar = CCLabelTTF::create("0","Marker Felt",45);
 	ccColor3B c0;  
-	c0.r=255;  
-	c0.g=255;  
-	c0.b=255;
+	c0.r=109;  
+	c0.g=70;  
+	c0.b=37;
 	mScoreBar->setColor(c0);
 	mScoreBar->setPosition(ccp(scoreSprite->getPosition().x,parentSize.height - 110));
 	this->addChild(mScoreBar);
+
+	mScoreAnimation = CCLabelTTF::create("0","Marker Felt",60);
+	mScoreAnimation->setColor(c0);
+	mScoreAnimation->setPosition(ccp(scoreSprite->getPosition().x,parentSize.height - 110));
+	mScoreAnimation->setVisible(false);
+	this->addChild(mScoreAnimation);
 
 	mBestScoreBar = CCLabelTTF::create("0","Marker Felt",40);
 	mBestScoreBar->setColor(c0);
@@ -82,6 +88,26 @@ void TZFGGameScene::initBackGround()
 	clearArea();
 	createSprite();
 	createSprite();
+}
+
+void TZFGGameScene::addScoreCallback()
+{
+		//mScoreAnimation
+}
+
+void TZFGGameScene::showAddScoreAnimation()
+{
+	char str[10];
+	memset(str,0,10);
+	sprintf(str,"+%d",mAddScore);
+	mScoreAnimation->setString(str);
+
+	mScoreAnimation->setPosition(ccp(mScoreBar->getPosition().x,mScoreBar->getPosition().y - 60));
+	mScoreAnimation->setVisible(true);
+	CCActionInterval *move = CCMoveBy::create(0.5,ccp(0,100));
+	CCActionInterval *alpha = CCFadeOut::create(0.5);
+	CCFiniteTimeAction *ccFiniteAction = CCSpawn::create(move,alpha,NULL);
+	mScoreAnimation->runAction(ccFiniteAction);
 }
 
 void TZFGGameScene::createSprite()
@@ -150,9 +176,9 @@ void TZFGGameScene::showSprite(int row,int column,int numIndex,bool bAnimate)
 	if(numIndex < 2)
 	{
 		ccColor3B color3b;
-		color3b.r = 0;
-		color3b.g = 0;
-		color3b.b = 0;
+		color3b.r = 255;
+		color3b.g = 255;
+		color3b.b = 255;
 
 		labelTTF->setColor(color3b);
 	}
@@ -165,7 +191,7 @@ void TZFGGameScene::showSprite(int row,int column,int numIndex,bool bAnimate)
 	sprintf(str,"%d",text);
 	labelTTF->setString(str);
 	labelTTF->setPosition(ccp(sprite->getContentSize().width/2,sprite->getContentSize().height/2));
-	labelTTF->setFontSize(30);
+	labelTTF->setFontSize(80);
 	
 	sprite->addChild(labelTTF);
 	if (bAnimate)
@@ -449,6 +475,7 @@ void TZFGGameScene::updateScoreBar()
 	memset(str,0,10);
 	sprintf(str,"%d",mScoreTotal);
 	mScoreBar->setString(str);
+	showAddScoreAnimation();
 	mAddScore = 0;
 }
 
@@ -458,11 +485,35 @@ void TZFGGameScene::moveCallback()
 	{
 		CCLOG("moveCallback");
 		updateAllArea();
+		showAddAreaAnimation();
 		bUpdate = false;
 		createSprite();
 		if(mAddScore != 0)
 		{
 			updateScoreBar();
+		}
+	}
+}
+
+void TZFGGameScene::showAddAreaAnimation()
+{
+	for(int i = 0 ; i < GAME_AREA_ROW;i++)
+	{
+		for(int j = 0 ; j < GAME_AREA_COLUMN;j++)
+		{
+			if(mAddArea[i][j] == 1)
+			{
+				CCLOG("sprite i = %d,j=%d 11111111111111111",i,j);
+				CCSprite *sprite = (CCSprite*)mGameLayer->getChildByTag(i*10 + j);
+				if(sprite != NULL)
+				{
+					sprite->setScale(1.2);
+					CCLOG("sprite i = %d,j=%d",i,j);
+					CCActionInterval *jump = CCScaleTo::create(0.3,1);
+					//CCFiniteTimeAction *ccFiniteAction = CCSequence::create(jump,CCCallFunc::create(this,callfunc_selector(TZFGGameScene::moveCallback)),NULL);
+					sprite->runAction(jump);
+				}
+			}
 		}
 	}
 }
@@ -590,6 +641,7 @@ bool TZFGGameScene::moveOther(int direct)
 	int j = 0;
 	int tempArea[GAME_AREA_ROW][GAME_AREA_COLUMN];
 	int tempMove[GAME_AREA_ROW][GAME_AREA_COLUMN];
+	int tempAdd[GAME_AREA_COLUMN];
 	for (i = 0;i < GAME_AREA_ROW;i++)
 	{
 		for (j = 0;j < GAME_AREA_COLUMN;j++)
@@ -605,11 +657,11 @@ bool TZFGGameScene::moveOther(int direct)
 			for(i = 0;i < GAME_AREA_ROW ; i++)
 			{
 				int tempColumn[GAME_AREA_COLUMN];
-				
 				for(n = 0;n < GAME_AREA_COLUMN;n++)
 				{
 					tempColumn[n] = 0;
 					tempMove[i][n] = 0;
+					mAddArea[i][n] = 0;
 				}
 				n = 0;
 				
@@ -634,6 +686,7 @@ bool TZFGGameScene::moveOther(int direct)
 						tempColumn[n] = 2*tempColumn[n];
 						tempColumn[n+1] = 0;
 						mAddScore += tempColumn[n];
+						mAddArea[i][n] = 1;
 					}
 				}
 				for (j = 0; j < GAME_AREA_COLUMN ;j++)
@@ -644,6 +697,7 @@ bool TZFGGameScene::moveOther(int direct)
 				for(n = 0;n < GAME_AREA_COLUMN;n++)
 				{
 					tempColumn[n] = 0;
+					tempAdd[n] = 0;
 				}
 				n = 0;
 				//去0
@@ -651,15 +705,17 @@ bool TZFGGameScene::moveOther(int direct)
 				{
 					if(mGameArea[i][j] != 0)
 					{
-						tempColumn[n++] = mGameArea[i][j];
+						tempColumn[n] = mGameArea[i][j];
+						tempAdd[n] = mAddArea[i][j];
+						n++;
 					}
 				}
 				for (j = 0; j < GAME_AREA_COLUMN ;j++)
 				{
 					mGameArea[i][j] = tempColumn[j];
+					mAddArea[i][j] = tempAdd[j];
 				}
 			}
-			
 			break;
 		}
 
@@ -674,6 +730,7 @@ bool TZFGGameScene::moveOther(int direct)
 				{
 					tempColumn[n] = 0;
 					tempMove[i][n] = 0;
+					mAddArea[i][n] = 0;
 				}
 				n = GAME_AREA_COLUMN - 1;
 				//去0
@@ -696,6 +753,7 @@ bool TZFGGameScene::moveOther(int direct)
 						tempColumn[n] = 2*tempColumn[n];
 						mAddScore += tempColumn[n];
 						tempColumn[n-1] = 0;
+						mAddArea[i][n] = 1;
 					}
 				}
 
@@ -707,6 +765,7 @@ bool TZFGGameScene::moveOther(int direct)
 				for(n = 0;n < GAME_AREA_COLUMN;n++)
 				{
 					tempColumn[n] = 0;
+					tempAdd[n] = 0;
 				}
 				n = GAME_AREA_COLUMN - 1;
 				//去0
@@ -714,12 +773,15 @@ bool TZFGGameScene::moveOther(int direct)
 				{
 					if(mGameArea[i][j] != 0)
 					{
-						tempColumn[n--] = mGameArea[i][j];
+						tempColumn[n] = mGameArea[i][j];
+						tempAdd[n] = mAddArea[i][j];
+						n--;
 					}
 				}
 				for (j = 0; j < GAME_AREA_COLUMN ;j++)
 				{
 					mGameArea[i][j] = tempColumn[j];
+					mAddArea[i][j] = tempAdd[j];
 				}
 			}
 			break;
@@ -734,6 +796,7 @@ bool TZFGGameScene::moveOther(int direct)
 				{
 					tempColumn[n] = 0;
 					tempMove[n][j] = 0;
+					mAddArea[n][j] = 0;
 				}
 				n = 0;
 				//去0
@@ -748,10 +811,10 @@ bool TZFGGameScene::moveOther(int direct)
 					{
 						
 						tempMove[i][j] = 1;
-						CCLOG("tempMove  i = %d,j=%d,area = %d",i,j,tempMove[i][j]);
+						//CCLOG("tempMove  i = %d,j=%d,area = %d",i,j,tempMove[i][j]);
 					}
 				}
-				CCLOG("tempMove  i = %d,j=%d,area = %d",i,j,tempMove[1][1]);
+				//CCLOG("tempMove  i = %d,j=%d,area = %d",i,j,tempMove[1][1]);
 				//合并
 				for(n = 0;n < GAME_AREA_ROW;n++)
 				{
@@ -760,6 +823,8 @@ bool TZFGGameScene::moveOther(int direct)
 						tempColumn[n] = 2*tempColumn[n];
 						mAddScore += tempColumn[n];
 						tempColumn[n+1] = 0;
+						mAddArea[n][j] = 1;
+						CCLOG("22222222222222222 n = %d,j=%d",n,j);
 					}
 				}
 				for (i = 0; i < GAME_AREA_ROW ;i++)
@@ -770,6 +835,7 @@ bool TZFGGameScene::moveOther(int direct)
 				for(n = 0;n < GAME_AREA_ROW;n++)
 				{
 					tempColumn[n] = 0;
+					tempAdd[n] = 0;
 				}
 				n = 0;
 				//去0
@@ -777,12 +843,17 @@ bool TZFGGameScene::moveOther(int direct)
 				{
 					if(mGameArea[i][j] != 0)
 					{
-						tempColumn[n++] = mGameArea[i][j];
+						tempColumn[n] = mGameArea[i][j];
+						tempAdd[n] = mAddArea[i][j];
+						n++;
+						//CCLOG("3333333333 n = %d,j=%d,p=%d",n,j,mAddArea[i][j]);
 					}
 				}
 				for (i = 0; i < GAME_AREA_ROW ;i++)
 				{
 					mGameArea[i][j] = tempColumn[i];
+					mAddArea[i][j] = tempAdd[i];
+					CCLOG("3333333333 i = %d,j=%d,p=%d",i,j,mAddArea[i][j]);
 				}
 			}
 			break;
@@ -798,6 +869,7 @@ bool TZFGGameScene::moveOther(int direct)
 				{
 					tempColumn[n] = 0;
 					tempMove[n][j] = 0;
+					mAddArea[n][j] = 0;
 				}
 				n = GAME_AREA_ROW - 1;
 				//去0
@@ -821,6 +893,7 @@ bool TZFGGameScene::moveOther(int direct)
 						tempColumn[n] = 2*tempColumn[n];
 						mAddScore += tempColumn[n];
 						tempColumn[n-1] = 0;
+						mAddArea[n][j] = 1;
 					}
 				}
 				for (i = 0; i < GAME_AREA_ROW ;i++)
@@ -831,6 +904,7 @@ bool TZFGGameScene::moveOther(int direct)
 				for(n = 0;n < GAME_AREA_ROW;n++)
 				{
 					tempColumn[n] = 0;
+					tempAdd[n] = 0;
 				}
 				n = GAME_AREA_ROW - 1;
 				//去0
@@ -838,12 +912,15 @@ bool TZFGGameScene::moveOther(int direct)
 				{
 					if(mGameArea[i][j] != 0)
 					{
-						tempColumn[n--] = mGameArea[i][j];
+						tempColumn[n] = mGameArea[i][j];
+						tempAdd[n] = mAddArea[i][j];
+						n--;
 					}
 				}
 				for (i = 0; i < GAME_AREA_ROW ;i++)
 				{
 					mGameArea[i][j] = tempColumn[i];
+					mAddArea[i][j] = tempAdd[i];
 				}
 			}
 			break;

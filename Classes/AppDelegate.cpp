@@ -29,7 +29,7 @@ bool AppDelegate::applicationDidFinishLaunching() {
 	//CCEGLView::sharedOpenGLView()->setDesignResolutionSize(screenSize.width, screenSize.height, kResolutionFixedWidth);
 	
 	pDirector->setContentScaleFactor(designSize.height/screenSize.height);
-	//pEGLView->setDesignResolutionSize(designSize.width, designSize.height, kResolutionNoBorder);
+	pEGLView->setDesignResolutionSize(designSize.width, designSize.height, kResolutionNoBorder);
 	glClearColor(255,255,55,255);
     // turn on display FPS
     //pDirector->setDisplayStats(true);
