@@ -176,9 +176,18 @@ void TZFGGameScene::showSprite(int row,int column,int numIndex,bool bAnimate)
 	if(numIndex < 2)
 	{
 		ccColor3B color3b;
-		color3b.r = 255;
-		color3b.g = 255;
-		color3b.b = 255;
+		color3b.r = 144;
+		color3b.g = 138;
+		color3b.b = 112;
+
+		labelTTF->setColor(color3b);
+	}
+	else
+	{
+		ccColor3B color3b;
+		color3b.r = 246;
+		color3b.g = 235;
+		color3b.b = 195;
 
 		labelTTF->setColor(color3b);
 	}
@@ -191,7 +200,7 @@ void TZFGGameScene::showSprite(int row,int column,int numIndex,bool bAnimate)
 	sprintf(str,"%d",text);
 	labelTTF->setString(str);
 	labelTTF->setPosition(ccp(sprite->getContentSize().width/2,sprite->getContentSize().height/2));
-	labelTTF->setFontSize(80);
+	labelTTF->setFontSize(70);
 	
 	sprite->addChild(labelTTF);
 	if (bAnimate)
