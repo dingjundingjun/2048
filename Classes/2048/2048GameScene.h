@@ -5,9 +5,12 @@
 
 #include "cocos2d.h"
 #include "cocos-ext.h"
+#include "SimpleAudioEngine.h"
 USING_NS_CC;
 USING_NS_CC_EXT;
 using namespace gui;
+using namespace cocos2d::extension;
+using namespace CocosDenshion;
 /**游戏方块行数*/
 #define GAME_AREA_ROW 4
 /**游戏方块列数*/
@@ -76,7 +79,18 @@ public:
 	int getGameBestScore();
 	/**设置最高分数*/
 	void setGameBestScore(int score);
-
+	/**加载声音*/
+	void preLoadSound();
+	/**播放得分音效*/
+	void playGetScoreSound();
+	/**显示得分动画*/
+	void showAddScoreAnimation();
+	/**显示合并动画*/
+	void showAddAreaAnimation();
+	/**保存是否播放声音*/
+	void setSound(int score);
+	/**获取是否播放声音*/
+	int getSound();
 private:
 	int mGameArea[GAME_AREA_ROW][GAME_AREA_COLUMN];
 	CCScale9Sprite *mBackgroundSprite;
@@ -100,11 +114,9 @@ private:
 	int mBestScore;
 	/**记录合并的位置*/
 	int mAddArea[GAME_AREA_ROW][GAME_AREA_COLUMN];
-	/**显示合并动画*/
-	void showAddAreaAnimation();
 	/**用来显示得分动画的*/
 	CCLabelTTF *mScoreAnimation;
-	/**显示得分动画*/
-	void showAddScoreAnimation();
+	int mPlaySound;
+
 };
 #endif

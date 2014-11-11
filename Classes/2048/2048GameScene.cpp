@@ -12,10 +12,12 @@ bool TZFGGameScene::init()
 {
 	setTouchEnabled(true);
 	setKeypadEnabled(true);
+	preLoadSound();
 	std::srand((unsigned int)time(0));
 	mAreaMoveSpeed = 0.15;
 	mScoreTotal = 0;
 	mAddScore = 0;
+	mPlaySound = getSound();
 	mBestScore = getGameBestScore();
 	CCLOG("game besssssssss = %d",mBestScore);
 	mScreenSize = CCDirector::sharedDirector()->getWinSize();
@@ -50,17 +52,17 @@ void TZFGGameScene::initBackGround()
 	logoSprite->setAnchorPoint(ccp(0.5,0.5));
 	logoSprite->setPosition(ccp(logoSprite->getContentSize().width / 2 + 30,parentSize.height - logoSprite->getContentSize().height/2 - 25));
 	this->addChild(logoSprite);
-
+	CCLOG("1111111111111111111");
 	CCSprite *scoreSprite = CCSprite::create("2048/fenshu.png");
 	scoreSprite->setAnchorPoint(ccp(0.5,0.5));
 	scoreSprite->setPosition(ccp(scoreSprite->getContentSize().width / 2 + 280,parentSize.height - scoreSprite->getContentSize().height/2 - 25));
 	this->addChild(scoreSprite);
-
+	CCLOG("222222222222222222222");
 	CCSprite *bestSprite = CCSprite::create("2048/lishi.png");
 	bestSprite->setAnchorPoint(ccp(0.5,0.5));
 	bestSprite->setPosition(ccp(bestSprite->getContentSize().width / 2 + 510,parentSize.height - bestSprite->getContentSize().height/2 - 25));
 	this->addChild(bestSprite);
-
+	CCLOG("33333333333333333333");
 	mScoreBar = CCLabelTTF::create("0","Marker Felt",45);
 	ccColor3B c0;  
 	c0.r=109;  
@@ -69,13 +71,13 @@ void TZFGGameScene::initBackGround()
 	mScoreBar->setColor(c0);
 	mScoreBar->setPosition(ccp(scoreSprite->getPosition().x,parentSize.height - 110));
 	this->addChild(mScoreBar);
-
+	CCLOG("44444444444444444");
 	mScoreAnimation = CCLabelTTF::create("0","Marker Felt",60);
 	mScoreAnimation->setColor(c0);
 	mScoreAnimation->setPosition(ccp(scoreSprite->getPosition().x,parentSize.height - 110));
 	mScoreAnimation->setVisible(false);
 	this->addChild(mScoreAnimation);
-
+	CCLOG("55555555555555555555555555");
 	mBestScoreBar = CCLabelTTF::create("0","Marker Felt",40);
 	mBestScoreBar->setColor(c0);
 	mBestScoreBar->setPosition(ccp(bestSprite->getPosition().x,parentSize.height - 110));
@@ -83,10 +85,12 @@ void TZFGGameScene::initBackGround()
 	memset(str,0,10);
 	sprintf(str,"%d",mBestScore);
 	mBestScoreBar->setString(str);
-
+	CCLOG("666666666666666666666666");
 	this->addChild(mBestScoreBar);
 	clearArea();
+	CCLOG("777777777777777777777");
 	createSprite();
+	CCLOG("8888888888888888888888888");
 	createSprite();
 }
 
@@ -206,8 +210,8 @@ void TZFGGameScene::showSprite(int row,int column,int numIndex,bool bAnimate)
 	if (bAnimate)
 	{
 		sprite->setScale(0.3);
-		CCActionInterval *scale = CCScaleTo::create(0.5,1);
-		CCFadeIn *fadeIn = CCFadeIn::create(0.5);
+		CCActionInterval *scale = CCScaleTo::create(0.3,1);
+		CCFadeIn *fadeIn = CCFadeIn::create(0.3);
 		CCFiniteTimeAction *ccFiniteAction = CCSpawn::create(scale,fadeIn,NULL);
 		sprite->runAction(ccFiniteAction);
 	}
@@ -500,6 +504,7 @@ void TZFGGameScene::moveCallback()
 		if(mAddScore != 0)
 		{
 			updateScoreBar();
+			playGetScoreSound();
 		}
 	}
 }
@@ -1038,14 +1043,31 @@ double TZFGGameScene::distance(CCPoint pt1,CCPoint pt2)
 
 bool TZFGGameScene::isGameOver()
 {
-	bool bFull = true;
+	bool bFull = false;
 	for(int i = 0;i < GAME_AREA_ROW;i++)
 		for (int j = 0;j < GAME_AREA_COLUMN;j++)
 		{
+			int p = mGameArea[i][j];
 			if(mGameArea[i][j] == 0)
 			{
-				bFull = false;
-				break;	
+				return false;
+			}
+			CCLOG("is GameOver i = %d,j = %d",i,j);
+			if(i - 1 >= 0 && mGameArea[i-1][j] == p)
+			{
+				return false;
+			}
+			if(i + 1 < GAME_AREA_COLUMN && mGameArea[i + 1][j] == p)
+			{
+				return false;
+			}
+			if(j - 1 >= 0 && mGameArea[i][j - 1] == p)
+			{
+				return false;
+			}
+			if(j + 1 < GAME_AREA_COLUMN && mGameArea[i][j + 1] == p)
+			{
+				return false;
 			}
 		}
 	return bFull;
@@ -1086,6 +1108,57 @@ void TZFGGameScene::setGameBestScore(int score)
 		CCLOG("get best score = %d",score);
 	}
 #endif
+}
+
+int TZFGGameScene::getSound()
+{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+	JniMethodInfo t;
+	CCLOG("getData_ ==========  ");
+	if (JniHelper::getMethodInfo(t, "com/jy/jytzfegame/GameDataControl", "getSound", "()I")) {
+		jclass header_class = t.env->FindClass("com/jy/jytzfegame/GameDataControl");
+		jmethodID init_id = t.env->GetStaticMethodID( header_class, "getInstance", "()Lcom/jy/jytzfegame/GameDataControl;");
+		CCLOG("get best init_id = %d",init_id);
+		jobject header_object = t.env->CallStaticObjectMethod(header_class, init_id);
+		jmethodID getBestScoreID = t.env->GetMethodID(header_class,"getSound","()I");
+		int score = t.env->CallIntMethod(header_object,getBestScoreID);
+		CCLOG("get best score = %d",score);
+		return score;
+	}
+#endif
+	return 1;
+}
+
+
+void TZFGGameScene::setSound(int score)
+{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+	JniMethodInfo t;
+	CCLOG("getData_ ==========  ");
+	if (JniHelper::getMethodInfo(t, "com/jy/jytzfegame/GameDataControl", "setSound", "(I)I")) {
+		jclass header_class = t.env->FindClass("com/jy/jytzfegame/GameDataControl");
+		jmethodID init_id = t.env->GetStaticMethodID( header_class, "getInstance", "()Lcom/jy/jytzfegame/GameDataControl;");
+		CCLOG("get best init_id = %d",init_id);
+		jobject header_object = t.env->CallStaticObjectMethod(header_class, init_id);
+		jmethodID getBestScoreID = t.env->GetMethodID(header_class,"setSound","(I)I");
+		t.env->CallIntMethod(header_object,getBestScoreID,score);
+		CCLOG("get best score = %d",score);
+	}
+#endif
+}
+
+void TZFGGameScene::preLoadSound()
+{
+	SimpleAudioEngine::sharedEngine()->preloadEffect("score.mp3");
+}
+
+void TZFGGameScene::playGetScoreSound()
+{
+	if(mPlaySound == 1)
+	{
+		CCLOG("play getScoreSound");
+		SimpleAudioEngine::sharedEngine()->playEffect("score.mp3");
+	}
 }
 
 
