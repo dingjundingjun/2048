@@ -91,6 +91,12 @@ public:
 	void setSound(int score);
 	/**获取是否播放声音*/
 	int getSound();
+	/**根据保存的变量来控制声音*/
+	void updateSoundBtn();
+	/**改变声音状态监听*/
+	void switchSound(CCObject* sender, TouchEventType type);
+	/**显示广告*/
+	void showAD();
 private:
 	int mGameArea[GAME_AREA_ROW][GAME_AREA_COLUMN];
 	CCScale9Sprite *mBackgroundSprite;
@@ -116,7 +122,10 @@ private:
 	int mAddArea[GAME_AREA_ROW][GAME_AREA_COLUMN];
 	/**用来显示得分动画的*/
 	CCLabelTTF *mScoreAnimation;
+	/**保存是否播放声音*/
 	int mPlaySound;
+	/**播放声音按钮*/
+	UIButton *mBtnPlaySound;
 
 };
 #endif

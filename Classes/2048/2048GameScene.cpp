@@ -50,48 +50,93 @@ void TZFGGameScene::initBackGround()
 
 	CCSprite *logoSprite = CCSprite::create("2048/logo.png");
 	logoSprite->setAnchorPoint(ccp(0.5,0.5));
-	logoSprite->setPosition(ccp(logoSprite->getContentSize().width / 2 + 30,parentSize.height - logoSprite->getContentSize().height/2 - 25));
+	logoSprite->setPosition(ccp(logoSprite->getContentSize().width / 2 + 30,parentSize.height - logoSprite->getContentSize().height/2 - 55));
 	this->addChild(logoSprite);
-	CCLOG("1111111111111111111");
+
 	CCSprite *scoreSprite = CCSprite::create("2048/fenshu.png");
 	scoreSprite->setAnchorPoint(ccp(0.5,0.5));
-	scoreSprite->setPosition(ccp(scoreSprite->getContentSize().width / 2 + 280,parentSize.height - scoreSprite->getContentSize().height/2 - 25));
+	scoreSprite->setPosition(ccp(scoreSprite->getContentSize().width / 2 + 150,parentSize.height - scoreSprite->getContentSize().height/2 - 45));
 	this->addChild(scoreSprite);
-	CCLOG("222222222222222222222");
+
 	CCSprite *bestSprite = CCSprite::create("2048/lishi.png");
 	bestSprite->setAnchorPoint(ccp(0.5,0.5));
-	bestSprite->setPosition(ccp(bestSprite->getContentSize().width / 2 + 510,parentSize.height - bestSprite->getContentSize().height/2 - 25));
+	bestSprite->setPosition(ccp(bestSprite->getContentSize().width / 2 + 410,parentSize.height - bestSprite->getContentSize().height/2 - 45));
 	this->addChild(bestSprite);
-	CCLOG("33333333333333333333");
+
 	mScoreBar = CCLabelTTF::create("0","Marker Felt",45);
 	ccColor3B c0;  
 	c0.r=109;  
 	c0.g=70;  
 	c0.b=37;
 	mScoreBar->setColor(c0);
-	mScoreBar->setPosition(ccp(scoreSprite->getPosition().x,parentSize.height - 110));
+	mScoreBar->setPosition(ccp(scoreSprite->getPosition().x,parentSize.height - 120));
 	this->addChild(mScoreBar);
-	CCLOG("44444444444444444");
+
 	mScoreAnimation = CCLabelTTF::create("0","Marker Felt",60);
 	mScoreAnimation->setColor(c0);
-	mScoreAnimation->setPosition(ccp(scoreSprite->getPosition().x,parentSize.height - 110));
+	mScoreAnimation->setPosition(ccp(scoreSprite->getPosition().x,parentSize.height - 120));
 	mScoreAnimation->setVisible(false);
 	this->addChild(mScoreAnimation);
-	CCLOG("55555555555555555555555555");
+
 	mBestScoreBar = CCLabelTTF::create("0","Marker Felt",40);
 	mBestScoreBar->setColor(c0);
-	mBestScoreBar->setPosition(ccp(bestSprite->getPosition().x,parentSize.height - 110));
+	mBestScoreBar->setPosition(ccp(bestSprite->getPosition().x,parentSize.height - 120));
 	char str[10];
 	memset(str,0,10);
 	sprintf(str,"%d",mBestScore);
 	mBestScoreBar->setString(str);
-	CCLOG("666666666666666666666666");
+
+	mBtnPlaySound = UIButton::create();
+	UILayer *mLayer = UILayer::create();
+	this->addChild(mLayer);
+	mBtnPlaySound->setTouchEnabled(true);
+	updateSoundBtn();
+	mBtnPlaySound->setPosition(ccp(680,parentSize.height - scoreSprite->getContentSize().height/2 - 45));
+	mBtnPlaySound->addTouchEventListener(this, toucheventselector(TZFGGameScene::switchSound));
+	mLayer->addWidget(mBtnPlaySound);
+	
+
 	this->addChild(mBestScoreBar);
 	clearArea();
-	CCLOG("777777777777777777777");
+
 	createSprite();
-	CCLOG("8888888888888888888888888");
 	createSprite();
+}
+
+void TZFGGameScene::switchSound(CCObject* sender, TouchEventType type)
+{
+	switch (type)
+	{
+	case TOUCH_EVENT_ENDED:
+		{
+			if(mPlaySound == 1)
+			{
+				mPlaySound = 0;
+			}
+			else
+			{
+				mPlaySound = 1;
+			}
+			updateSoundBtn();
+		}
+		break;
+
+	default:
+		break;
+	}
+}
+
+void TZFGGameScene::updateSoundBtn()
+{
+	if(mPlaySound == 1)
+	{
+		mBtnPlaySound->loadTextures("2048/sound_open.png","2048/sound_open.png","");
+	}
+	else
+	{
+		mBtnPlaySound->loadTextures("2048/sound_close.png","2048/sound_close.png","");
+	}
+	setSound(mPlaySound);
 }
 
 void TZFGGameScene::addScoreCallback()
@@ -1143,6 +1188,21 @@ void TZFGGameScene::setSound(int score)
 		jmethodID getBestScoreID = t.env->GetMethodID(header_class,"setSound","(I)I");
 		t.env->CallIntMethod(header_object,getBestScoreID,score);
 		CCLOG("get best score = %d",score);
+	}
+#endif
+}
+
+void TZFGGameScene::showAD()
+{
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
+	JniMethodInfo t;
+	CCLOG("getData_ ==========  ");
+	if (JniHelper::getStaticMethodInfo(t, "org/cocos2dx/lib/Cocos2dxActivity", "showBannerStatic", "()V")) {
+		jclass header_class = t.env->FindClass("org/cocos2dx/lib/Cocos2dxActivity");
+		jmethodID init_id = t.env->GetStaticMethodID( header_class, "showBannerStatic", "()V");
+		CCLOG("get best init_id1111111111111111111111111");
+		jobject header_object = t.env->CallStaticObjectMethod(header_class, init_id);
+		CCLOG("get best score2222222222222222222222222");
 	}
 #endif
 }
