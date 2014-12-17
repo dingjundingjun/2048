@@ -1088,7 +1088,7 @@ double TZFGGameScene::distance(CCPoint pt1,CCPoint pt2)
 
 bool TZFGGameScene::isGameOver()
 {
-	bool bFull = false;
+	bool bFull = true;
 	for(int i = 0;i < GAME_AREA_ROW;i++)
 		for (int j = 0;j < GAME_AREA_COLUMN;j++)
 		{
